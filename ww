@@ -1,0 +1,83 @@
+#include"reg52.h"
+ 
+#define uchar unsigned char
+#define uint unsigned int
+ 
+sbit lcdrs=P2^4;
+sbit lcdrw=P2^5;
+sbit lcden=P2^6;
+ 
+uchar code table[]={
+0x00,0x00,0x00,0x1F,0x00,0x00,0x00,0x00,//一
+0x00,0x00,0x0E,0x00,0x1F,0x00,0x00,0x00,//二
+0x00,0x1F,0x00,0x0E,0x00,0x1F,0x00,0x00,//三
+0x02,0x04,0x0F,0x12,0x0F,0x0A,0x1F,0x02,//年
+0x0F,0x09,0x0F,0x09,0x0F,0x09,0x09,0x11,//月
+0x1F,0x11,0x11,0x1F,0x11,0x11,0x1F,0x00,//日
+0x00,0x00,0x00,0x0A,0x15,0x0A,0x04,0x00,//心型
+0x00,0x04,0x15,0x0E,0x1F,0x0E,0x11,0x00//坦克
+};
+uchar code table1[]={0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07};  //自定义字符数据地址
+uchar code table2[]="QQ:598852247";
+void delay(uchar z)
+{
+       uint x,y;
+       for(x=z;x>0;x--)
+              for(y=122;y>0;y--);      
+}
+void write_cmd(uchar cmd)
+{
+       lcdrs=0;
+       lcdrw=0;    //选择指令寄存器
+       lcden=1;
+       P0=cmd;     //写了命令
+       delay(5);
+       lcden=0;    //使能拉低
+       lcden=1;
+}
+void write_date(uchar date)
+{
+       lcdrs=1;
+       lcdrw=0;    //选择数据寄存器
+       lcden=1;
+       P0=date;     //写了命令
+       delay(5);
+       lcden=0;    //使能拉低
+       lcden=1;
+}
+void init_lcd1602()
+{
+       write_cmd(0x01);  //清屏
+       write_cmd(0x38);  //功能设置
+       write_cmd(0x0c);  //显示设置
+       write_cmd(0x06);  //输入方式从左到右
+       delay(1);
+}
+void main()
+{
+       uchar i;
+       init_lcd1602();
+       delay(1);
+      
+       while(1)
+       {
+              write_cmd(0x40);    //开始写入你要显示的自定义字符、汉字代码
+              for(i=0;i<64;i++)
+              {
+                     write_date(table[i]);
+                     delay(5);
+              }
+              write_cmd(0x80);    //从第一行第一列开始显示
+              for(i=0;i<8;i++)     //显示自定义字符
+              {
+                     write_date(table1[i]);  
+                     delay(5);
+              }
+              write_cmd(0xc0);   //显示QQ：598852247
+              for(i=0;i<12;i++)
+              {
+                     write_date(table2[i]);
+                     delay(5);
+              }
+       }
+}
