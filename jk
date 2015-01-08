@@ -1,0 +1,37 @@
+NAME    T6               
+OUTPORT EQU    0CFB0H
+CSEG AT 0000H
+       	  LJMP START
+CSEG AT 401BH            
+        LJMP INT
+CSEG AT 4100H
+START:  MOV    A,#01H    
+        MOV    R1,#03H   
+        MOV    R0,#5H    
+        MOV    TMOD,#10H 
+        MOV    TL1,#0AFH  
+        MOV    TH1,#03CH
+        ORL    IE,#88H   
+                        
+        SETB   TR1       
+LOOP1:  CJNE   R0,#00,DISP
+        MOV    R0,#5H   
+        INC    R1        
+        CJNE   R1,#31H,LOOP2
+        MOV    R1,#03H  
+LOOP2:  MOV    A,R1      
+        MOVC   A,@A+PC
+        JMP    DISP
+        DB     01H,03H,07H,0FH,1FH,3FH,7FH,0FFH,0FEH,0FCH
+        DB     0F8H,0F0H,0E0H,0C0H,80H,00H,0FFH,00H,0FEH
+        DB     0FDH,0FBH,0F7H,0EFH,0DFH,0BFH,07FH,0BFH,0DFH
+        DB     0EFH,0F7H,0FBH,0FDH,0FEH,00H,0FFH,00H
+DISP:   MOV    P1,A     
+        JMP    LOOP1
+INT:    CLR    TR1       
+        DEC    R0        
+        MOV    TL1,#0AFH  
+        MOV    TH1,#03CH
+        SETB   TR1      
+        RETI            
+END
